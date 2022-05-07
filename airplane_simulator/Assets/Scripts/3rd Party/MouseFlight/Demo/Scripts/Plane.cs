@@ -17,8 +17,8 @@ namespace MFlight.Demo
     [RequireComponent(typeof(Rigidbody))]
     public class Plane : MonoBehaviour
     {
-        [Header("Components")]
-        [SerializeField] private MouseFlightController controller = null;
+        // [Header("Components")]
+        // [SerializeField] private MouseFlightController controller = null;
 
         [Header("Physics")]
         [Tooltip("Force to push plane forwards with")] public float thrust = 100f;
@@ -47,8 +47,8 @@ namespace MFlight.Demo
         {
             rigid = GetComponent<Rigidbody>();
 
-            if (controller == null)
-                Debug.LogError(name + ": Plane - Missing reference to MouseFlightController!");
+            // if (controller == null)
+            //     Debug.LogError(name + ": Plane - Missing reference to MouseFlightController!");
         }
 
         private void Update()
@@ -75,8 +75,8 @@ namespace MFlight.Demo
             float autoYaw = 0f;
             float autoPitch = 0f;
             float autoRoll = 0f;
-            if (controller != null)
-                RunAutopilot(controller.MouseAimPos, out autoYaw, out autoPitch, out autoRoll);
+            // if (controller != null)
+            //     RunAutopilot(controller.MouseAimPos, out autoYaw, out autoPitch, out autoRoll);
 
             // Use either keyboard or autopilot input.
             yaw = autoYaw;
@@ -133,7 +133,7 @@ namespace MFlight.Demo
         {
             // Ultra simple flight where the plane just gets pushed forward and manipulated
             // with torques to turn.
-            rigid.AddRelativeForce(Vector3.forward * thrust * forceMult, ForceMode.Force);
+            rigid.AddRelativeForce(Vector3.right * thrust * forceMult, ForceMode.Force);
             rigid.AddRelativeTorque(new Vector3(turnTorque.x * pitch,
                                                 turnTorque.y * yaw,
                                                 -turnTorque.z * roll) * forceMult,
