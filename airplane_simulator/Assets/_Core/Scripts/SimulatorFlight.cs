@@ -12,6 +12,7 @@ public enum State
 }
 public class SimulatorFlight : MonoBehaviour
 {
+    [SerializeField] private float Velocity;
     [Header("Graphic")] 
     [SerializeField] private Transform m_Graphic;
     [SerializeField] private AnimationPlane m_Animation;
@@ -34,12 +35,10 @@ public class SimulatorFlight : MonoBehaviour
     [SerializeField] private float T3;
     [SerializeField] private AnimationCurve Curve3;
     [Header("Phase 4")] 
-    [SerializeField] private Vector3 m_EndVelocity;
-    [Header("Phase 5")] 
-    [SerializeField] private bool UsePhase5;
+    [SerializeField] private bool UsePhase4;
     [SerializeField] private float m_TimeStartPhase;
     [SerializeField] private float R;
-    [SerializeField] private float T5;
+    [SerializeField] private float T4;
     [SerializeField] private float Depth;
     [SerializeField] private AnimationCurve Curve5;
     [SerializeField] private AnimationCurve Curve6;
@@ -49,6 +48,7 @@ public class SimulatorFlight : MonoBehaviour
     private State m_CurrentState;
     private Vector3 m_LastGraphicPosition;
     private Quaternion m_NextGraphicRotation;
+    private Vector3 m_HoldingVelocity;
     private IEnumerator Start()
     {
         m_Rigidbody = GetComponent<Rigidbody>();
@@ -70,7 +70,8 @@ public class SimulatorFlight : MonoBehaviour
                     m_Rigidbody.DOMove(new Vector3(m_Rigidbody.position.x + SH,m_Rigidbody.position.y + H,m_Rigidbody.position.z), T3).SetEase(Curve3).OnComplete(() =>
                     {
                         m_CurrentState = State.Stable;
-                        if (UsePhase5)
+                        m_HoldingVelocity = Velocity * Vector3.right;
+                        if (UsePhase4)
                         {
                             StartCoroutine(Phase5());
                         }
@@ -85,20 +86,23 @@ public class SimulatorFlight : MonoBehaviour
         switch (m_CurrentState)
         {
             case State.Stable:
-                m_Rigidbody.velocity = m_EndVelocity;
+                m_Rigidbody.velocity = m_HoldingVelocity;
                 break;
             case State.Back:
-                m_Rigidbody.velocity = m_EndVelocity;
+                m_Rigidbody.velocity = m_HoldingVelocity;
                 m_Graphic.position = Vector3.Lerp(m_LastGraphicPosition, transform.position, 0.05f);
+                Velocity = (m_Graphic.position - m_LastGraphicPosition).magnitude / Time.fixedDeltaTime;
                 m_LastGraphicPosition = m_Graphic.position;
                 return;
             case State.Turning:
                 m_Graphic.position = Vector3.Lerp(m_LastGraphicPosition, transform.position, 0.05f);
+                Velocity = (m_Graphic.position - m_LastGraphicPosition).magnitude / Time.fixedDeltaTime;
                 m_LastGraphicPosition = m_Graphic.position;
                 return;
         }
         
         m_Graphic.position = Vector3.Lerp(m_LastGraphicPosition, transform.position, 0.05f);
+        Velocity = (m_Graphic.position - m_LastGraphicPosition).magnitude / Time.fixedDeltaTime;
         m_NextGraphicRotation = Quaternion.Euler(Vector3.forward * Vector2.SignedAngle(Vector2.right,m_Graphic.position - m_LastGraphicPosition));
         m_Graphic.rotation = Quaternion.Lerp(m_Graphic.rotation,m_NextGraphicRotation,0.15f);
         m_LastGraphicPosition = m_Graphic.position;
@@ -117,16 +121,16 @@ public class SimulatorFlight : MonoBehaviour
             new Vector3(currentPosition.x,currentPosition.y, Depth * 2)
         };
 
-        m_Rigidbody.DOPath(path, T5, PathType.CatmullRom).SetEase(Curve5).OnComplete(() =>
+        m_Rigidbody.DOPath(path, T4, PathType.CatmullRom).SetEase(Curve5).OnComplete(() =>
         {
             m_CurrentState = State.Back;
-            m_EndVelocity = -m_EndVelocity;
+            m_HoldingVelocity = Velocity * Vector3.left;
         });
-        m_Graphic.DORotate(new Vector3(55, -90, 0), T5*0.5f).SetEase(Curve6).OnComplete(() =>
+        m_Graphic.DORotate(new Vector3(55, -90, 0), T4*0.5f).SetEase(Curve6).OnComplete(() =>
         {
-            m_Graphic.DORotate(new Vector3(20, -180, 0), T5*0.5f).SetEase(Curve7).OnComplete(() =>
+            m_Graphic.DORotate(new Vector3(20, -180, 0), T4*0.5f).SetEase(Curve7).OnComplete(() =>
             {
-                m_Graphic.DORotate(new Vector3(0, -180, 0), T5);
+                m_Graphic.DORotate(new Vector3(0, -180, 0), T4);
             });
         });
         
