@@ -39,14 +39,18 @@ public class GameManager : MonoBehaviour
     [Header("Assemble")] 
     [SerializeField] private float Ttc = 10;
 
-    [Header("Camera")] [SerializeField] private CinemachineVirtualCamera m_MainCamera;
+    [Header("Camera")] 
+    [SerializeField] private CinemachineVirtualCamera m_MainCamera;
+    [SerializeField] private AnimationCurve m_StartCameraAnimation;
 
     private Vector3 m_LastCaptainPosition;
     private Transform m_CaptainTransform;
+    private CinemachineTransposer m_MainCameraComposer;
     private void Awake()
     {
         Instance = this;
         Application.targetFrameRate = 60;
+        m_MainCameraComposer = m_MainCamera.GetCinemachineComponent<CinemachineTransposer>();
         m_Clouds.position = new Vector3(m_Clouds.position.x, m_CloudsHeight, m_Clouds.position.z);
         m_CaptainTransform = m_Captain.transform;
         m_LastCaptainPosition = m_CaptainTransform.position;
@@ -57,6 +61,8 @@ public class GameManager : MonoBehaviour
         var delay = new WaitForSeconds(m_TimeWaitPlane - 10);
         yield return new WaitForSeconds(1);
         m_Captain.StartSimulator(m_TypeSimulator,Role.Captain);
+        DOTween.To(() => m_MainCameraComposer.m_FollowOffset, value => m_MainCameraComposer.m_FollowOffset = value,
+            new Vector3(0, 20, -20), 10).SetEase(m_StartCameraAnimation);
         yield return delay;
         m_MemberLeft.StartSimulator(m_TypeSimulator,Role.MemberLeft);
         yield return delay;
@@ -73,14 +79,31 @@ public class GameManager : MonoBehaviour
 
     public void PlaneStable()
     {
-        if (++m_StablePlane == 4)
+        switch (++m_StablePlane)
         {
-            var captainPosition = m_CaptainTransform.position;
-            var assembleX = captainPosition.x + Ttc * SimulatorFlight.m_HoldingVelocity.x;
-            m_Captain.Assemble(new Vector3(assembleX,captainPosition.y,captainPosition.z),Ttc);
-            m_MemberLeft.Assemble(new Vector3(assembleX - 10,captainPosition.y,captainPosition.z - 10),Ttc);
-            m_MemberRight.Assemble(new Vector3(assembleX - 10,captainPosition.y,captainPosition.z + 10),Ttc);
-            m_MemberBack.Assemble(new Vector3(assembleX - 20,captainPosition.y,captainPosition.z - 20),Ttc);
+            case 1:
+                DOTween.To(() => m_MainCameraComposer.m_FollowOffset, value => m_MainCameraComposer.m_FollowOffset = value,
+                    new Vector3(30, 40, -20), 10).SetEase(m_StartCameraAnimation).SetDelay(2);
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                var captainPosition = m_CaptainTransform.position;
+                var assembleX = captainPosition.x + Ttc * SimulatorFlight.m_HoldingVelocity.x;
+                m_Captain.Assemble(new Vector3(assembleX,captainPosition.y,captainPosition.z),Ttc);
+                m_MemberLeft.Assemble(new Vector3(assembleX - 10,captainPosition.y,captainPosition.z - 10),Ttc);
+                m_MemberRight.Assemble(new Vector3(assembleX - 10,captainPosition.y,captainPosition.z + 10),Ttc);
+                m_MemberBack.Assemble(new Vector3(assembleX - 20,captainPosition.y,captainPosition.z - 20),Ttc);
+                StartCoroutine(WaitEnd());
+                break;
         }
+    }
+
+    public IEnumerator WaitEnd()
+    {
+        yield return new WaitForSeconds(Ttc + 5);
+        m_MainCamera.Follow = null;
     }
 }
