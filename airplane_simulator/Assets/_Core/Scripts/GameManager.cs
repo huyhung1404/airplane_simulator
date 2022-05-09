@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
 using DG.Tweening;
 using UnityEngine;
 
@@ -37,9 +38,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private SimulatorFlight m_MemberBack;
     [Header("Assemble")] 
     [SerializeField] private float Ttc = 10;
-    
-    [Header("Camera")]
-    
+
+    [Header("Camera")] [SerializeField] private CinemachineVirtualCamera m_MainCamera;
 
     private Vector3 m_LastCaptainPosition;
     private Transform m_CaptainTransform;

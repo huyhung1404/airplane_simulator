@@ -67,8 +67,8 @@ public class SimulatorFlight : MonoBehaviour
         var path = new[]
         {
             plane.position,
-            new Vector3(plane.position.x,plane.position.y,-10),
-            new Vector3(plane.position.x + 10,plane.position.y,-7.77f),
+            new Vector3(plane.position.x,plane.position.y, plane.position.z + 12),
+            new Vector3(plane.position.x + 10,plane.position.y,plane.position.z  + 14.3f),
         };
 
         plane.DOPath(path, 10, PathType.CatmullRom).SetEase(Ease.InOutSine).OnComplete(() =>
