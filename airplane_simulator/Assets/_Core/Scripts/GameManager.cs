@@ -25,18 +25,21 @@ public class GameManager : MonoBehaviour
     private int m_StablePlane = 0;
     public static GameManager Instance;
     [Header("Simulator")] [SerializeField] private TypeSimulator m_TypeSimulator;
-    
+
     [Header("Clouds")] [SerializeField] private Transform m_Clouds;
     [SerializeField] private float m_CloudsHeight;
 
     [Header("Plane")] 
-    [SerializeField] private float m_TimeWaitPlane;
+    [SerializeField] private float m_TimeWaitPlane = 20;
     [SerializeField] private SimulatorFlight m_Captain;
     [SerializeField] private SimulatorFlight m_MemberLeft;
     [SerializeField] private SimulatorFlight m_MemberRight;
     [SerializeField] private SimulatorFlight m_MemberBack;
     [Header("Assemble")] 
-    [SerializeField] private float m_TimeAssemble = 10;
+    [SerializeField] private float Ttc = 10;
+    
+    [Header("Camera")]
+    
 
     private Vector3 m_LastCaptainPosition;
     private Transform m_CaptainTransform;
@@ -51,7 +54,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator Start()
     {
-        var delay = new WaitForSeconds(m_TimeWaitPlane);
+        var delay = new WaitForSeconds(m_TimeWaitPlane - 10);
         yield return new WaitForSeconds(1);
         m_Captain.StartSimulator(m_TypeSimulator,Role.Captain);
         yield return delay;
@@ -73,11 +76,11 @@ public class GameManager : MonoBehaviour
         if (++m_StablePlane == 4)
         {
             var captainPosition = m_CaptainTransform.position;
-            var assembleX = captainPosition.x + m_TimeAssemble * SimulatorFlight.m_HoldingVelocity.x;
-            m_Captain.Assemble(new Vector3(assembleX,captainPosition.y,captainPosition.z),m_TimeAssemble);
-            m_MemberLeft.Assemble(new Vector3(assembleX - 10,captainPosition.y,captainPosition.z - 10),m_TimeAssemble);
-            m_MemberRight.Assemble(new Vector3(assembleX - 10,captainPosition.y,captainPosition.z + 10),m_TimeAssemble);
-            m_MemberBack.Assemble(new Vector3(assembleX - 20,captainPosition.y,captainPosition.z - 20),m_TimeAssemble);
+            var assembleX = captainPosition.x + Ttc * SimulatorFlight.m_HoldingVelocity.x;
+            m_Captain.Assemble(new Vector3(assembleX,captainPosition.y,captainPosition.z),Ttc);
+            m_MemberLeft.Assemble(new Vector3(assembleX - 10,captainPosition.y,captainPosition.z - 10),Ttc);
+            m_MemberRight.Assemble(new Vector3(assembleX - 10,captainPosition.y,captainPosition.z + 10),Ttc);
+            m_MemberBack.Assemble(new Vector3(assembleX - 20,captainPosition.y,captainPosition.z - 20),Ttc);
         }
     }
 }
