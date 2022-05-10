@@ -43,6 +43,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private CinemachineVirtualCamera m_MainCamera;
     [SerializeField] private AnimationCurve m_StartCameraAnimation;
 
+    [Header("Canvas")] 
+    [SerializeField] private CanvasGroup m_MapView;
+    [SerializeField] private CanvasGroup m_DisplayView;
+    [SerializeField] private GameObject m_StartCamera;
+
     private Vector3 m_LastCaptainPosition;
     private Transform m_CaptainTransform;
     private CinemachineTransposer m_MainCameraComposer;
@@ -62,13 +67,18 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(1);
         m_Captain.StartSimulator(m_TypeSimulator,Role.Captain);
         DOTween.To(() => m_MainCameraComposer.m_FollowOffset, value => m_MainCameraComposer.m_FollowOffset = value,
-            new Vector3(0, 20, -20), 10).SetEase(m_StartCameraAnimation);
+            new Vector3(0, 20, -20), 10).SetEase(m_StartCameraAnimation).OnComplete(() =>
+        {
+            m_MapView.DOFade(1, 1);
+            m_DisplayView.DOFade(1, 1);
+        });
         yield return delay;
         m_MemberLeft.StartSimulator(m_TypeSimulator,Role.MemberLeft);
         yield return delay;
         m_MemberRight.StartSimulator(m_TypeSimulator,Role.MemberRight);
         yield return delay;
         m_MemberBack.StartSimulator(m_TypeSimulator,Role.MemberBack);
+        m_DisplayView.DOFade(0, 1).SetDelay(15).OnComplete(() => m_StartCamera.SetActive(false));
     }
 
     private void FixedUpdate()
@@ -83,7 +93,7 @@ public class GameManager : MonoBehaviour
         {
             case 1:
                 DOTween.To(() => m_MainCameraComposer.m_FollowOffset, value => m_MainCameraComposer.m_FollowOffset = value,
-                    new Vector3(30, 40, -20), 10).SetEase(m_StartCameraAnimation).SetDelay(2);
+                    new Vector3(30, 40, -20), 10).SetEase(m_StartCameraAnimation).SetDelay(20);
                 break;
             case 2:
                 break;
@@ -96,14 +106,11 @@ public class GameManager : MonoBehaviour
                 m_MemberLeft.Assemble(new Vector3(assembleX - 10,captainPosition.y,captainPosition.z - 10),Ttc);
                 m_MemberRight.Assemble(new Vector3(assembleX - 10,captainPosition.y,captainPosition.z + 10),Ttc);
                 m_MemberBack.Assemble(new Vector3(assembleX - 20,captainPosition.y,captainPosition.z - 20),Ttc);
-                StartCoroutine(WaitEnd());
+                m_MapView.DOFade(0, 1).SetDelay(Ttc + 5).OnComplete(() =>
+                {
+                    m_MainCamera.Follow = null;
+                });
                 break;
         }
-    }
-
-    public IEnumerator WaitEnd()
-    {
-        yield return new WaitForSeconds(Ttc + 5);
-        m_MainCamera.Follow = null;
     }
 }

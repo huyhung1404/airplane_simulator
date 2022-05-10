@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class MiniMap : MonoBehaviour
 {
+    [SerializeField] private float Width = 5000;
+    [SerializeField] private float Height = 1000;
+    [SerializeField] private float StartPos = -100;
     [SerializeField] private RectTransform m_DotCaptain;
     [SerializeField] private Transform m_GraphicCaptain;
     [SerializeField] private RectTransform m_DotMemberLeft;
@@ -13,10 +16,6 @@ public class MiniMap : MonoBehaviour
     [SerializeField] private Transform m_GraphicMemberRight;
     [SerializeField] private RectTransform m_DotMemberBack;
     [SerializeField] private Transform m_GraphicMemberBack;
-    
-    private float Width = 5000;
-    private float StartWidth = -100;
-    private float Height = 1000;
     private float WidthMap;
     private float HeightMap;
 
@@ -27,7 +26,7 @@ public class MiniMap : MonoBehaviour
         HeightMap = rect.y;
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         m_DotCaptain.anchoredPosition = HandlePosition(m_GraphicCaptain.position);
         m_DotMemberLeft.anchoredPosition = HandlePosition(m_GraphicMemberLeft.position);
@@ -37,7 +36,7 @@ public class MiniMap : MonoBehaviour
 
     private Vector2 HandlePosition(Vector2 pos)
     {
-        var ratioX = (pos.x - StartWidth) / Width;
+        var ratioX = (pos.x - StartPos) / Width;
         var ratioY = pos.y / Height;
         return new Vector2(ratioX * WidthMap,  ratioY * HeightMap);
     }
