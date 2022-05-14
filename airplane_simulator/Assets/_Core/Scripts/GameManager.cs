@@ -41,12 +41,13 @@ public class GameManager : MonoBehaviour
 
     [Header("Camera")] 
     [SerializeField] private CinemachineVirtualCamera m_MainCamera;
+    [SerializeField] private CinemachineVirtualCamera m_StartCamera;
+    [SerializeField] private GameObject m_BackCamera;
     [SerializeField] private AnimationCurve m_StartCameraAnimation;
 
     [Header("Canvas")] 
     [SerializeField] private CanvasGroup m_MapView;
     [SerializeField] private CanvasGroup m_DisplayView;
-    [SerializeField] private GameObject m_StartCamera;
 
     private Vector3 m_LastCaptainPosition;
     private Transform m_CaptainTransform;
@@ -63,22 +64,26 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator Start()
     {
-        var delay = new WaitForSeconds(m_TimeWaitPlane - 10);
         yield return new WaitForSeconds(1);
+        var delay = new WaitForSeconds(m_TimeWaitPlane);
+        StartCoroutine(CameraManager());
         m_Captain.StartSimulator(m_TypeSimulator,Role.Captain);
-        DOTween.To(() => m_MainCameraComposer.m_FollowOffset, value => m_MainCameraComposer.m_FollowOffset = value,
-            new Vector3(0, 20, -20), 10).SetEase(m_StartCameraAnimation).OnComplete(() =>
-        {
-            m_MapView.DOFade(1, 1);
-            m_DisplayView.DOFade(1, 1);
-        });
         yield return delay;
         m_MemberLeft.StartSimulator(m_TypeSimulator,Role.MemberLeft);
         yield return delay;
         m_MemberRight.StartSimulator(m_TypeSimulator,Role.MemberRight);
         yield return delay;
         m_MemberBack.StartSimulator(m_TypeSimulator,Role.MemberBack);
-        m_DisplayView.DOFade(0, 1).SetDelay(15).OnComplete(() => m_StartCamera.SetActive(false));
+        m_DisplayView.DOFade(0, 1).SetDelay(25).OnComplete(() => m_BackCamera.SetActive(false));
+    }
+
+    private IEnumerator CameraManager()
+    {
+        yield return new WaitForSeconds(20);
+        m_MainCamera.gameObject.SetActive(true);
+        m_StartCamera.gameObject.SetActive(false);
+        m_MapView.DOFade(1, 1);
+        m_DisplayView.DOFade(1, 1);
     }
 
     private void FixedUpdate()
