@@ -67,19 +67,19 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(1);
         var delay = new WaitForSeconds(m_TimeWaitPlane);
         StartCoroutine(CameraManager());
-        m_Captain.StartSimulator(m_TypeSimulator,Role.Captain);
+        m_Captain.StartSimulator(Role.Captain,m_TimeWaitPlane);
         yield return delay;
-        m_MemberLeft.StartSimulator(m_TypeSimulator,Role.MemberLeft);
+        m_MemberLeft.StartSimulator(Role.MemberLeft,m_TimeWaitPlane);
         yield return delay;
-        m_MemberRight.StartSimulator(m_TypeSimulator,Role.MemberRight);
+        m_MemberRight.StartSimulator(Role.MemberRight,m_TimeWaitPlane);
         yield return delay;
-        m_MemberBack.StartSimulator(m_TypeSimulator,Role.MemberBack);
-        m_DisplayView.DOFade(0, 1).SetDelay(25).OnComplete(() => m_BackCamera.SetActive(false));
+        m_MemberBack.StartSimulator(Role.MemberBack,m_TimeWaitPlane);
+        m_DisplayView.DOFade(0, 1).SetDelay(m_TimeWaitPlane + 5).OnComplete(() => m_BackCamera.SetActive(false));
     }
 
     private IEnumerator CameraManager()
     {
-        yield return new WaitForSeconds(20);
+        yield return new WaitForSeconds(m_TimeWaitPlane);
         m_MainCamera.gameObject.SetActive(true);
         m_StartCamera.gameObject.SetActive(false);
         m_MapView.DOFade(1, 1);
@@ -97,25 +97,48 @@ public class GameManager : MonoBehaviour
         switch (++m_StablePlane)
         {
             case 1:
-                DOTween.To(() => m_MainCameraComposer.m_FollowOffset, value => m_MainCameraComposer.m_FollowOffset = value,
-                    new Vector3(30, 40, -20), 10).SetEase(m_StartCameraAnimation).SetDelay(20);
+                if (m_TypeSimulator == TypeSimulator.Straight)
+                {
+                    DOTween.To(() => m_MainCameraComposer.m_FollowOffset, value => m_MainCameraComposer.m_FollowOffset = value,
+                        new Vector3(30, 40, -20), 10).SetEase(m_StartCameraAnimation).SetDelay(20);
+                }
                 break;
             case 2:
                 break;
             case 3:
                 break;
             case 4:
-                var captainPosition = m_CaptainTransform.position;
-                var assembleX = captainPosition.x + Ttc * SimulatorFlight.m_HoldingVelocity.x;
-                m_Captain.Assemble(new Vector3(assembleX,captainPosition.y,captainPosition.z),Ttc);
-                m_MemberLeft.Assemble(new Vector3(assembleX - 10,captainPosition.y,captainPosition.z - 10),Ttc);
-                m_MemberRight.Assemble(new Vector3(assembleX - 10,captainPosition.y,captainPosition.z + 10),Ttc);
-                m_MemberBack.Assemble(new Vector3(assembleX - 20,captainPosition.y,captainPosition.z - 20),Ttc);
-                m_MapView.DOFade(0, 1).SetDelay(Ttc + 5).OnComplete(() =>
+                Vector3 _positionAssemble;
+                switch (m_TypeSimulator)
                 {
-                    m_MainCamera.Follow = null;
-                });
+                    case TypeSimulator.Straight:
+                        _positionAssemble = new Vector3(m_CaptainTransform.position.x + Ttc * SimulatorFlight.m_HoldingVelocity.x, m_CaptainTransform.position.y, m_CaptainTransform.position.z);
+                        m_Captain.Assemble(_positionAssemble,Ttc);
+                        m_MemberLeft.Assemble(new Vector3(_positionAssemble.x - 10,_positionAssemble.y,_positionAssemble.z - 10),Ttc);
+                        m_MemberRight.Assemble(new Vector3(_positionAssemble.x - 10,_positionAssemble.y,_positionAssemble.z + 10),Ttc);
+                        m_MemberBack.Assemble(new Vector3(_positionAssemble.x - 20,_positionAssemble.y,_positionAssemble.z - 20),Ttc);
+                        m_MapView.DOFade(0, 1).SetDelay(Ttc + 5).OnComplete(() =>
+                        {
+                            m_MainCamera.Follow = null;
+                        });
+                        break;
+                    case TypeSimulator.Back:
+                        _positionAssemble = new Vector3(m_MemberBack.transform.position.x - 100, m_MemberBack.transform.position.y + 200, m_MemberBack.transform.position.z + 200);
+                        m_Captain.TurnBack(_positionAssemble,0,50);
+                        DOTween.To(() => m_MainCameraComposer.m_FollowOffset, value => m_MainCameraComposer.m_FollowOffset = value,
+                            new Vector3(30, 40, -20), 10).SetEase(m_StartCameraAnimation).SetDelay(20);
+                        // m_MemberLeft.TurnBack(new Vector3(_positionAssemble.x + 10,_positionAssemble.y,_positionAssemble.z +10),6,Ttc);
+                        // m_MemberRight.TurnBack(new Vector3(_positionAssemble.x + 10,_positionAssemble.y,_positionAssemble.z - 10),12,Ttc);
+                        // m_MemberBack.TurnBack(new Vector3(_positionAssemble.x + 20,_positionAssemble.y,_positionAssemble.z + 20),18,Ttc);
+                        m_MapView.DOFade(0, 1).SetDelay(Ttc + 5).OnComplete(() =>
+                        {
+                            m_MainCamera.Follow = null;
+                        });
+                        break;
+                }
+                
                 break;
         }
     }
+    
 }

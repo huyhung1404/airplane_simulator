@@ -31,10 +31,7 @@ public class SimulatorFlight : MonoBehaviour
     [SerializeField] private float SH;
     [SerializeField] private float T3;
     [SerializeField] private AnimationCurve Curve3;
-    [Header("Phase 4")] [SerializeField] private float m_TimeStartPhase;
-    [SerializeField] private float R;
-    [SerializeField] private float T4;
-    [SerializeField] private float Depth;
+    [Header("Phase 4")]
     [SerializeField] private AnimationCurve Curve5;
     [SerializeField] private AnimationCurve Curve6;
     [SerializeField] private AnimationCurve Curve7;
@@ -47,7 +44,6 @@ public class SimulatorFlight : MonoBehaviour
     private Vector3 m_LastGraphicPosition;
     private Quaternion m_NextGraphicRotation;
     public static Vector3 m_HoldingVelocity;
-    private TypeSimulator m_TypeSimulator;
     private Role m_Role;
 
     private void Start()
@@ -56,9 +52,8 @@ public class SimulatorFlight : MonoBehaviour
         m_CurrentState = State.None;
     }
 
-    public void StartSimulator(TypeSimulator _type, Role _role)
+    public void StartSimulator(Role _role,float _timeStart)
     {
-        m_TypeSimulator = _type;
         m_Role = _role;
         var plane = transform.parent;
         var _pos1 = new Vector3(plane.position.x, 0, plane.position.z + 10);
@@ -79,7 +74,7 @@ public class SimulatorFlight : MonoBehaviour
 
             _pos5, _pos5, _pos5
         };
-        plane.DOPath(path, 20, PathType.CubicBezier).SetEase(m_StartCurve).OnComplete(
+        plane.DOPath(path, _timeStart, PathType.CubicBezier).SetEase(m_StartCurve).OnComplete(
             () =>
             {
                 m_CurrentState = State.GetAltitude;
@@ -107,16 +102,7 @@ public class SimulatorFlight : MonoBehaviour
                             {
                                 m_HoldingVelocity = GameManager.CaptainVelocity * Vector3.right;
                             }
-
-                            switch (m_TypeSimulator)
-                            {
-                                case TypeSimulator.Straight:
-                                    GameManager.Instance.PlaneStable();
-                                    break;
-                                case TypeSimulator.Back:
-                                    StartCoroutine(Phase5());
-                                    break;
-                            }
+                            GameManager.Instance.PlaneStable();
                         });
                     });
                 });
@@ -150,22 +136,28 @@ public class SimulatorFlight : MonoBehaviour
         m_LastGraphicPosition = m_Graphic.position;
     }
 
-    private IEnumerator Phase5()
+    public void TurnBack(Vector3 _pos,float _timeStart,float _timeDuration)
     {
-        yield return new WaitForSeconds(m_TimeStartPhase);
+        var T4 = 10;
         m_CurrentState = State.Turning;
         var currentPosition = transform.position;
         var path = new[]
         {
-            currentPosition,
-            new Vector3(currentPosition.x + R, currentPosition.y, Depth),
-            new Vector3(currentPosition.x, currentPosition.y, Depth * 2)
+            new Vector3(currentPosition.x + 100, currentPosition.y + 100, currentPosition.z + 100),
+            new Vector3(currentPosition.x + 50, currentPosition.y, currentPosition.z),
+            new Vector3(currentPosition.x + 100, currentPosition.y + 25, currentPosition.z),
+            
+            new Vector3(currentPosition.x, currentPosition.y + 200, currentPosition.z + 200),
+            new Vector3(currentPosition.x + 100, currentPosition.y + 175, currentPosition.z + 200),
+            new Vector3(currentPosition.x + 50, currentPosition.y + 200, currentPosition.z + 200),
         };
-
-        m_Rigidbody.DOPath(path, T4, PathType.CatmullRom).SetEase(Curve5).OnComplete(() =>
+        m_Rigidbody.DOPath(path, T4, PathType.CubicBezier).SetEase(Curve5).OnComplete(() =>
         {
-            m_CurrentState = State.Back;
-            m_HoldingVelocity = GameManager.CaptainVelocity * Vector3.left;
+            m_Rigidbody.DOMove(_pos, _timeDuration - _timeStart  - T4).SetEase(m_AssemblyCurve).OnComplete(() =>
+            {
+                m_HoldingVelocity *= -1;
+                m_CurrentState = State.Back;
+            });
         });
         m_Graphic.DORotate(new Vector3(55, -90, 0), T4 * 0.5f).SetEase(Curve6).OnComplete(() =>
         {
