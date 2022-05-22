@@ -39,6 +39,12 @@ public class GameManager : MonoBehaviour
     [Header("Assemble")] 
     [SerializeField] private float Ttc = 10;
 
+    [Header("TurnBack")] 
+    [SerializeField] private float TimeTurnBack = 10;
+    [SerializeField] private float TdlLeft;
+    [SerializeField] private float TdlRight;
+    [SerializeField] private float TdlBack;
+
     [Header("Camera")] 
     [SerializeField] private CinemachineVirtualCamera m_MainCamera;
     [SerializeField] private CinemachineVirtualCamera m_StartCamera;
@@ -124,12 +130,12 @@ public class GameManager : MonoBehaviour
                         break;
                     case TypeSimulator.Back:
                         _positionAssemble = new Vector3(m_MemberBack.transform.position.x - 100, m_MemberBack.transform.position.y + 200, m_MemberBack.transform.position.z + 200);
-                        m_Captain.TurnBack(_positionAssemble,0,50);
+                        m_Captain.TurnBack(_positionAssemble,0,Ttc,TimeTurnBack);
                         DOTween.To(() => m_MainCameraComposer.m_FollowOffset, value => m_MainCameraComposer.m_FollowOffset = value,
-                            new Vector3(30, 40, -20), 10).SetEase(m_StartCameraAnimation).SetDelay(20);
-                        // m_MemberLeft.TurnBack(new Vector3(_positionAssemble.x + 10,_positionAssemble.y,_positionAssemble.z +10),6,Ttc);
-                        // m_MemberRight.TurnBack(new Vector3(_positionAssemble.x + 10,_positionAssemble.y,_positionAssemble.z - 10),12,Ttc);
-                        // m_MemberBack.TurnBack(new Vector3(_positionAssemble.x + 20,_positionAssemble.y,_positionAssemble.z + 20),18,Ttc);
+                            new Vector3(30, 40, -20), 10).SetEase(m_StartCameraAnimation).SetDelay(10);
+                        m_MemberLeft.TurnBack(new Vector3(_positionAssemble.x + 10,_positionAssemble.y,_positionAssemble.z + 10),TdlLeft,Ttc,TimeTurnBack);
+                        m_MemberRight.TurnBack(new Vector3(_positionAssemble.x + 10,_positionAssemble.y,_positionAssemble.z - 10),TdlRight,Ttc,TimeTurnBack);
+                        m_MemberBack.TurnBack(new Vector3(_positionAssemble.x + 20,_positionAssemble.y,_positionAssemble.z + 20),TdlBack,Ttc,TimeTurnBack);
                         m_MapView.DOFade(0, 1).SetDelay(Ttc + 5).OnComplete(() =>
                         {
                             m_MainCamera.Follow = null;

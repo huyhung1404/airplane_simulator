@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
@@ -44,6 +45,7 @@ public class SimulatorFlight : MonoBehaviour
     private Vector3 m_LastGraphicPosition;
     private Quaternion m_NextGraphicRotation;
     public static Vector3 m_HoldingVelocity;
+    private Vector3 m_BackVelocity;
     private Role m_Role;
 
     private void Start()
@@ -120,7 +122,7 @@ public class SimulatorFlight : MonoBehaviour
                 m_Rigidbody.velocity = m_HoldingVelocity;
                 break;
             case State.Back:
-                m_Rigidbody.velocity = m_HoldingVelocity;
+                m_Rigidbody.velocity = m_BackVelocity;
                 m_Graphic.position = Vector3.Lerp(m_LastGraphicPosition, transform.position, 0.05f);
                 m_LastGraphicPosition = m_Graphic.position;
                 return;
@@ -136,9 +138,9 @@ public class SimulatorFlight : MonoBehaviour
         m_LastGraphicPosition = m_Graphic.position;
     }
 
-    public void TurnBack(Vector3 _pos,float _timeStart,float _timeDuration)
+    public async void TurnBack(Vector3 _pos,float _timeStart,float _timeDuration,float _timeTurnBack)
     {
-        var T4 = 10;
+        await Task.Delay(TimeSpan.FromSeconds(_timeStart));
         m_CurrentState = State.Turning;
         var currentPosition = transform.position;
         var path = new[]
@@ -151,19 +153,19 @@ public class SimulatorFlight : MonoBehaviour
             new Vector3(currentPosition.x + 100, currentPosition.y + 175, currentPosition.z + 200),
             new Vector3(currentPosition.x + 50, currentPosition.y + 200, currentPosition.z + 200),
         };
-        m_Rigidbody.DOPath(path, T4, PathType.CubicBezier).SetEase(Curve5).OnComplete(() =>
+        m_Rigidbody.DOPath(path, _timeTurnBack, PathType.CubicBezier).SetEase(Curve5).OnComplete(() =>
         {
-            m_Rigidbody.DOMove(_pos, _timeDuration - _timeStart  - T4).SetEase(m_AssemblyCurve).OnComplete(() =>
+            m_Rigidbody.DOMove(_pos, _timeDuration - _timeStart  - _timeTurnBack).SetEase(m_AssemblyCurve).OnComplete(() =>
             {
-                m_HoldingVelocity *= -1;
+                m_BackVelocity = m_HoldingVelocity * -1;
                 m_CurrentState = State.Back;
             });
         });
-        m_Graphic.DORotate(new Vector3(55, -90, 0), T4 * 0.5f).SetEase(Curve6).OnComplete(() =>
+        m_Graphic.DORotate(new Vector3(55, -90, 0), _timeTurnBack * 0.5f).SetEase(Curve6).OnComplete(() =>
         {
-            m_Graphic.DORotate(new Vector3(20, -180, 0), T4 * 0.5f).SetEase(Curve7).OnComplete(() =>
+            m_Graphic.DORotate(new Vector3(20, -180, 0), _timeTurnBack * 0.5f).SetEase(Curve7).OnComplete(() =>
             {
-                m_Graphic.DORotate(new Vector3(0, -180, 0), T4);
+                m_Graphic.DORotate(new Vector3(0, -180, 0), _timeTurnBack);
             });
         });
     }
