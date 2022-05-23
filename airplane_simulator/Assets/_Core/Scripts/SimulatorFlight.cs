@@ -38,6 +38,7 @@ public class SimulatorFlight : MonoBehaviour
     [SerializeField] private AnimationCurve Curve7;
     [SerializeField] private AnimationCurve m_StartCurve;
 
+    [SerializeField] private Vector3 m_LastVelocity;
 
     [SerializeField] private AnimationCurve m_AssemblyCurve;
     private Rigidbody m_Rigidbody;
@@ -102,7 +103,9 @@ public class SimulatorFlight : MonoBehaviour
                             m_CurrentState = State.Stable;
                             if (m_Role == Role.Captain)
                             {
-                                m_HoldingVelocity = GameManager.CaptainVelocity * Vector3.right;
+                                // m_HoldingVelocity = GameManager.CaptainVelocity * Vector3.right;
+                                m_HoldingVelocity = m_LastVelocity;
+                                Debug.Log(m_HoldingVelocity);
                             }
                             GameManager.Instance.PlaneStable();
                         });

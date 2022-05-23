@@ -30,36 +30,34 @@ public class GameManager : MonoBehaviour
     [Header("Clouds")] [SerializeField] private Transform m_Clouds;
     [SerializeField] private float m_CloudsHeight;
 
-    [Header("Plane")] 
-    [SerializeField] private float m_TimeWaitPlane = 20;
+    [Header("Plane")] [SerializeField] private float m_TimeWaitPlane = 20;
     [SerializeField] private SimulatorFlight m_Captain;
     [SerializeField] private SimulatorFlight m_MemberLeft;
     [SerializeField] private SimulatorFlight m_MemberRight;
     [SerializeField] private SimulatorFlight m_MemberBack;
-    [Header("Assemble")] 
-    [SerializeField] private float Ttc = 10;
+    [Header("Assemble")] [SerializeField] private float Ttc = 10;
 
-    [Header("TurnBack")] 
-    [SerializeField] private float TimeTurnBack = 10;
+    [Header("TurnBack")] [SerializeField] private float TimeTurnBack = 10;
     [SerializeField] private float TdlLeft;
     [SerializeField] private float TdlRight;
     [SerializeField] private float TdlBack;
 
-    [Header("Camera")] 
-    [SerializeField] private CinemachineVirtualCamera m_MainCamera;
+    [Header("Camera")] [SerializeField] private CinemachineVirtualCamera m_MainCamera;
     [SerializeField] private CinemachineVirtualCamera m_StartCamera;
     [SerializeField] private GameObject m_BackCamera;
     [SerializeField] private AnimationCurve m_StartCameraAnimation;
 
-    [Header("Canvas")] 
-    [SerializeField] private CanvasGroup m_MapView;
+    [Header("Canvas")] [SerializeField] private CanvasGroup m_MapView;
     [SerializeField] private CanvasGroup m_DisplayView;
 
     private Vector3 m_LastCaptainPosition;
     private Transform m_CaptainTransform;
     private CinemachineTransposer m_MainCameraComposer;
+    public float m_TimeScale;
+
     private void Awake()
     {
+        Time.timeScale = m_TimeScale;
         Instance = this;
         Application.targetFrameRate = 60;
         m_MainCameraComposer = m_MainCamera.GetCinemachineComponent<CinemachineTransposer>();
@@ -73,19 +71,19 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(1);
         var delay = new WaitForSeconds(m_TimeWaitPlane);
         StartCoroutine(CameraManager());
-        m_Captain.StartSimulator(Role.Captain,m_TimeWaitPlane);
+        m_Captain.StartSimulator(Role.Captain, m_TimeWaitPlane + 10);
         yield return delay;
-        m_MemberLeft.StartSimulator(Role.MemberLeft,m_TimeWaitPlane);
+        m_MemberLeft.StartSimulator(Role.MemberLeft, m_TimeWaitPlane + 10);
         yield return delay;
-        m_MemberRight.StartSimulator(Role.MemberRight,m_TimeWaitPlane);
+        m_MemberRight.StartSimulator(Role.MemberRight, m_TimeWaitPlane + 10);
         yield return delay;
-        m_MemberBack.StartSimulator(Role.MemberBack,m_TimeWaitPlane);
+        m_MemberBack.StartSimulator(Role.MemberBack, m_TimeWaitPlane + 10);
         m_DisplayView.DOFade(0, 1).SetDelay(m_TimeWaitPlane + 5).OnComplete(() => m_BackCamera.SetActive(false));
     }
 
     private IEnumerator CameraManager()
     {
-        yield return new WaitForSeconds(m_TimeWaitPlane);
+        yield return new WaitForSeconds(m_TimeWaitPlane + 10);
         m_MainCamera.gameObject.SetActive(true);
         m_StartCamera.gameObject.SetActive(false);
         m_MapView.DOFade(1, 1);
@@ -105,9 +103,11 @@ public class GameManager : MonoBehaviour
             case 1:
                 if (m_TypeSimulator == TypeSimulator.Straight)
                 {
-                    DOTween.To(() => m_MainCameraComposer.m_FollowOffset, value => m_MainCameraComposer.m_FollowOffset = value,
+                    DOTween.To(() => m_MainCameraComposer.m_FollowOffset,
+                        value => m_MainCameraComposer.m_FollowOffset = value,
                         new Vector3(30, 40, -20), 10).SetEase(m_StartCameraAnimation).SetDelay(20);
                 }
+
                 break;
             case 2:
                 break;
@@ -118,33 +118,47 @@ public class GameManager : MonoBehaviour
                 switch (m_TypeSimulator)
                 {
                     case TypeSimulator.Straight:
-                        _positionAssemble = new Vector3(m_CaptainTransform.position.x + Ttc * SimulatorFlight.m_HoldingVelocity.x, m_CaptainTransform.position.y, m_CaptainTransform.position.z);
-                        m_Captain.Assemble(_positionAssemble,Ttc);
-                        m_MemberLeft.Assemble(new Vector3(_positionAssemble.x - 10,_positionAssemble.y,_positionAssemble.z - 10),Ttc);
-                        m_MemberRight.Assemble(new Vector3(_positionAssemble.x - 10,_positionAssemble.y,_positionAssemble.z + 10),Ttc);
-                        m_MemberBack.Assemble(new Vector3(_positionAssemble.x - 20,_positionAssemble.y,_positionAssemble.z - 20),Ttc);
+                        _positionAssemble =
+                            new Vector3(m_CaptainTransform.position.x + Ttc * SimulatorFlight.m_HoldingVelocity.x,
+                                m_CaptainTransform.position.y, m_CaptainTransform.position.z);
+                        m_Captain.Assemble(_positionAssemble, Ttc);
+                        m_MemberLeft.Assemble(
+                            new Vector3(_positionAssemble.x - 15, _positionAssemble.y, _positionAssemble.z - 15), Ttc);
+                        m_MemberRight.Assemble(
+                            new Vector3(_positionAssemble.x - 15, _positionAssemble.y, _positionAssemble.z + 15), Ttc);
+                        m_MemberBack.Assemble(
+                            new Vector3(_positionAssemble.x - 30, _positionAssemble.y, _positionAssemble.z - 30), Ttc);
                         m_MapView.DOFade(0, 1).SetDelay(Ttc + 5).OnComplete(() =>
                         {
+                            FindObjectOfType<CloudsFollow>().End();
                             m_MainCamera.Follow = null;
                         });
                         break;
                     case TypeSimulator.Back:
-                        _positionAssemble = new Vector3(m_MemberBack.transform.position.x - 100, m_MemberBack.transform.position.y + 200, m_MemberBack.transform.position.z + 200);
-                        m_Captain.TurnBack(_positionAssemble,0,Ttc,TimeTurnBack);
-                        DOTween.To(() => m_MainCameraComposer.m_FollowOffset, value => m_MainCameraComposer.m_FollowOffset = value,
+                        _positionAssemble = new Vector3(m_MemberBack.transform.position.x - 100,
+                            m_MemberBack.transform.position.y + 200, m_MemberBack.transform.position.z + 200);
+                        m_Captain.TurnBack(_positionAssemble, 0, Ttc, TimeTurnBack);
+                        DOTween.To(() => m_MainCameraComposer.m_FollowOffset,
+                            value => m_MainCameraComposer.m_FollowOffset = value,
                             new Vector3(30, 40, -20), 10).SetEase(m_StartCameraAnimation).SetDelay(10);
-                        m_MemberLeft.TurnBack(new Vector3(_positionAssemble.x + 10,_positionAssemble.y,_positionAssemble.z + 10),TdlLeft,Ttc,TimeTurnBack);
-                        m_MemberRight.TurnBack(new Vector3(_positionAssemble.x + 10,_positionAssemble.y,_positionAssemble.z - 10),TdlRight,Ttc,TimeTurnBack);
-                        m_MemberBack.TurnBack(new Vector3(_positionAssemble.x + 20,_positionAssemble.y,_positionAssemble.z + 20),TdlBack,Ttc,TimeTurnBack);
+                        m_MemberLeft.TurnBack(
+                            new Vector3(_positionAssemble.x + 10, _positionAssemble.y, _positionAssemble.z + 10),
+                            TdlLeft, Ttc, TimeTurnBack);
+                        m_MemberRight.TurnBack(
+                            new Vector3(_positionAssemble.x + 10, _positionAssemble.y, _positionAssemble.z - 10),
+                            TdlRight, Ttc, TimeTurnBack);
+                        m_MemberBack.TurnBack(
+                            new Vector3(_positionAssemble.x + 20, _positionAssemble.y, _positionAssemble.z + 20),
+                            TdlBack, Ttc, TimeTurnBack);
                         m_MapView.DOFade(0, 1).SetDelay(Ttc + 5).OnComplete(() =>
                         {
+                            FindObjectOfType<CloudsFollow>().End();
                             m_MainCamera.Follow = null;
                         });
                         break;
                 }
-                
+
                 break;
         }
     }
-    
 }
