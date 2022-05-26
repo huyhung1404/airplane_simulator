@@ -142,9 +142,14 @@ public class SimulatorFlight : MonoBehaviour
         m_LastGraphicPosition = m_Graphic.position;
     }
 
-    public async void TurnBack(Vector3 _pos,float _timeStart,float _timeDuration,float _timeTurnBack)
+    public void TurnBack(Vector3 _pos,float _timeStart,float _timeDuration,float _timeTurnBack)
     {
-        await Task.Delay(TimeSpan.FromSeconds(_timeStart));
+        StartCoroutine(COTurnBack(_pos,_timeStart,_timeDuration,_timeTurnBack));
+    }
+
+    private IEnumerator COTurnBack(Vector3 _pos,float _timeStart,float _timeDuration,float _timeTurnBack)
+    {
+        yield return new WaitForSeconds(_timeStart);
         m_CurrentState = State.Turning;
         var currentPosition = transform.position;
         var path = new[]

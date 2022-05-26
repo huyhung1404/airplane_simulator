@@ -127,20 +127,20 @@ public class GameManager : MonoBehaviour
                         });
                         break;
                     case TypeSimulator.Back:
-                        _positionAssemble = new Vector3(m_MemberBack.transform.position.x - 100,
+                        _positionAssemble = new Vector3(m_MemberBack.transform.position.x - 400,
                             m_MemberBack.transform.position.y + 200, m_MemberBack.transform.position.z + 200);
                         m_Captain.TurnBack(_positionAssemble, 0, Ttc, TimeTurnBack);
                         DOTween.To(() => m_MainCameraComposer.m_FollowOffset,
                             value => m_MainCameraComposer.m_FollowOffset = value,
                             new Vector3(30, 40, -20), 10).SetEase(m_StartCameraAnimation).SetDelay(10);
                         m_MemberLeft.TurnBack(
-                            new Vector3(_positionAssemble.x + 10, _positionAssemble.y, _positionAssemble.z + 10),
+                            new Vector3(_positionAssemble.x + 15, _positionAssemble.y, _positionAssemble.z + 15),
                             TdlLeft, Ttc, TimeTurnBack);
                         m_MemberRight.TurnBack(
-                            new Vector3(_positionAssemble.x + 10, _positionAssemble.y, _positionAssemble.z - 10),
+                            new Vector3(_positionAssemble.x + 15, _positionAssemble.y, _positionAssemble.z - 15),
                             TdlRight, Ttc, TimeTurnBack);
                         m_MemberBack.TurnBack(
-                            new Vector3(_positionAssemble.x + 20, _positionAssemble.y, _positionAssemble.z + 20),
+                            new Vector3(_positionAssemble.x + 30, _positionAssemble.y, _positionAssemble.z + 30),
                             TdlBack, Ttc, TimeTurnBack);
                         m_MapView.DOFade(0, 1).SetDelay(Ttc + 5).OnComplete(() =>
                         {
