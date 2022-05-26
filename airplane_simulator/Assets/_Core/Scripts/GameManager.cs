@@ -22,7 +22,6 @@ public enum Role
 
 public class GameManager : MonoBehaviour
 {
-    public static float CaptainVelocity;
     private int m_StablePlane = 0;
     public static GameManager Instance;
     [Header("Simulator")] [SerializeField] private TypeSimulator m_TypeSimulator;
@@ -50,11 +49,10 @@ public class GameManager : MonoBehaviour
     [Header("Canvas")] [SerializeField] private CanvasGroup m_MapView;
     [SerializeField] private CanvasGroup m_DisplayView;
 
-    private Vector3 m_LastCaptainPosition;
     private Transform m_CaptainTransform;
     private CinemachineTransposer m_MainCameraComposer;
     public float m_TimeScale;
-
+    
     private void Awake()
     {
         Time.timeScale = m_TimeScale;
@@ -63,11 +61,11 @@ public class GameManager : MonoBehaviour
         m_MainCameraComposer = m_MainCamera.GetCinemachineComponent<CinemachineTransposer>();
         m_Clouds.position = new Vector3(m_Clouds.position.x, m_CloudsHeight, m_Clouds.position.z);
         m_CaptainTransform = m_Captain.transform;
-        m_LastCaptainPosition = m_CaptainTransform.position;
     }
 
     private IEnumerator Start()
     {
+        AudioPlane.instance.PlayAudioStart();
         yield return new WaitForSeconds(1);
         var delay = new WaitForSeconds(m_TimeWaitPlane);
         StartCoroutine(CameraManager());
@@ -89,13 +87,7 @@ public class GameManager : MonoBehaviour
         m_MapView.DOFade(1, 1);
         m_DisplayView.DOFade(1, 1);
     }
-
-    private void FixedUpdate()
-    {
-        CaptainVelocity = (m_CaptainTransform.position - m_LastCaptainPosition).magnitude / Time.fixedDeltaTime;
-        m_LastCaptainPosition = m_CaptainTransform.position;
-    }
-
+    
     public void PlaneStable()
     {
         switch (++m_StablePlane)

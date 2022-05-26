@@ -87,6 +87,7 @@ public class SimulatorFlight : MonoBehaviour
 
     private void StartFlight()
     {
+        if(m_Role == Role.Captain) AudioPlane.instance.PlayAudioFly();
         m_Rigidbody.DOMoveX(m_Rigidbody.position.x + S0, T0).SetEase(Curve0).OnComplete(() =>
         {
             m_Animation.StartFly();
