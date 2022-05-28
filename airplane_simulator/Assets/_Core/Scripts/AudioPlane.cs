@@ -5,10 +5,10 @@ using UnityEngine;
 
 public class AudioPlane : MonoBehaviour
 {
-    [SerializeField] private AudioClip m_StartClip;
-    [SerializeField] private AudioClip m_FlyClip;
-    [SerializeField] private AudioClip m_Audio1;
-    [SerializeField] private AudioClip m_Audio2;
+    [SerializeField] private AudioClip m_KhoiDong;
+    [SerializeField] private AudioClip m_CatCanh;
+    [SerializeField] private AudioClip m_Bay;
+    [SerializeField] private AudioSource[] m_ChildAudio;
     
     private AudioSource m_Audio;
 
@@ -20,21 +20,32 @@ public class AudioPlane : MonoBehaviour
         instance = this;
     }
 
-    public void PlayAudioStart()
+    public void PlayAudioKhoiDong()
     {
-        m_Audio.PlayOneShot(m_StartClip);
+        m_Audio.clip = m_KhoiDong;
+        m_Audio.Play();
     }
 
-    public void PlayAudioFly()
+    public void PlayAudioCatCanh()
     {
-        m_Audio.PlayOneShot(m_FlyClip);
-        StartCoroutine(LoopAudio());
+        m_Audio.clip = m_CatCanh;
+        m_Audio.volume = 0.8f;
+        m_Audio.Play();
     }
 
-    private IEnumerator LoopAudio()
+    public void PlayAudioBay()
     {
-        yield return new WaitForSeconds(30);
-        m_Audio.PlayOneShot(m_FlyClip);
-        StartCoroutine(LoopAudio());
+        m_Audio.clip = m_Bay;
+        m_Audio.volume = 1f;
+        m_Audio.Play();
+        m_Audio.loop = true;
+    }
+
+    public void PlayAudioAssembly()
+    {
+        for (int i = m_ChildAudio.Length - 1; i >= 0; i--)
+        {
+            m_ChildAudio[i].Play();
+        }
     }
 }

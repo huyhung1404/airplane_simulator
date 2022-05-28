@@ -87,10 +87,11 @@ public class SimulatorFlight : MonoBehaviour
 
     private void StartFlight()
     {
-        if(m_Role == Role.Captain) AudioPlane.instance.PlayAudioFly();
+        if(m_Role == Role.Captain) AudioPlane.instance.PlayAudioCatCanh();
         m_Rigidbody.DOMoveX(m_Rigidbody.position.x + S0, T0).SetEase(Curve0).OnComplete(() =>
         {
             m_Animation.StartFly();
+            if(m_Role == Role.Captain) AudioPlane.instance.PlayAudioBay();
             m_Rigidbody
                 .DOMove(new Vector3(m_Rigidbody.position.x + Sat, m_Rigidbody.position.y + h, m_Rigidbody.position.z),
                     T1).SetEase(Curve1).OnComplete(() =>

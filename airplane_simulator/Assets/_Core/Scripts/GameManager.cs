@@ -65,7 +65,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator Start()
     {
-        AudioPlane.instance.PlayAudioStart();
+        AudioPlane.instance.PlayAudioKhoiDong();
         yield return new WaitForSeconds(1);
         var delay = new WaitForSeconds(m_TimeWaitPlane);
         StartCoroutine(CameraManager());
@@ -107,6 +107,7 @@ public class GameManager : MonoBehaviour
                 break;
             case 4:
                 Vector3 _positionAssemble;
+                AudioPlane.instance.PlayAudioAssembly();
                 switch (m_TypeSimulator)
                 {
                     case TypeSimulator.Straight:
