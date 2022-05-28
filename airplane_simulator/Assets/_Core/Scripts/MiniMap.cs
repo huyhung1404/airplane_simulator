@@ -1,11 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using DG.Tweening;
 using UnityEngine;
 
 public class MiniMap : MonoBehaviour
 {
     [SerializeField] private float Width = 5000;
+    [SerializeField] private float Width2 = 12000;
     [SerializeField] private float Height = 1000;
     [SerializeField] private float StartPos = -100;
     [SerializeField] private RectTransform m_DotCaptain;
@@ -24,6 +27,11 @@ public class MiniMap : MonoBehaviour
         var rect = GetComponent<RectTransform>().sizeDelta;
         WidthMap = rect.x;
         HeightMap = rect.y;
+    }
+
+    public void ChangeWidth()
+    {
+        DOVirtual.Float(Width, Width2, 5, value => Width = value);
     }
 
     private void LateUpdate()

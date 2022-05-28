@@ -105,9 +105,8 @@ public class SimulatorFlight : MonoBehaviour
                             m_CurrentState = State.Stable;
                             if (m_Role == Role.Captain)
                             {
-                                // m_HoldingVelocity = GameManager.CaptainVelocity * Vector3.right;
+                                FindObjectOfType<MiniMap>().ChangeWidth();
                                 m_HoldingVelocity = m_LastVelocity;
-                                Debug.Log(m_HoldingVelocity);
                             }
                             GameManager.Instance.PlaneStable();
                         });
@@ -143,12 +142,12 @@ public class SimulatorFlight : MonoBehaviour
         m_LastGraphicPosition = m_Graphic.position;
     }
 
-    public void TurnBack(Vector3 _pos,float _timeStart,float _timeDuration,float _timeTurnBack)
+    public void TurnBack(Vector3 _pos,float _timeStart,float _timeDuration,float _timeTurnBack,float _offsetX,float _offsetZ)
     {
-        StartCoroutine(COTurnBack(_pos,_timeStart,_timeDuration,_timeTurnBack));
+        StartCoroutine(COTurnBack(_pos,_timeStart,_timeDuration,_timeTurnBack,_offsetX,_offsetZ));
     }
 
-    private IEnumerator COTurnBack(Vector3 _pos,float _timeStart,float _timeDuration,float _timeTurnBack)
+    private IEnumerator COTurnBack(Vector3 _pos,float _timeStart,float _timeDuration,float _timeTurnBack,float _offsetX,float _offsetZ)
     {
         yield return new WaitForSeconds(_timeStart);
         m_CurrentState = State.Turning;
@@ -159,9 +158,9 @@ public class SimulatorFlight : MonoBehaviour
             new Vector3(currentPosition.x + 50, currentPosition.y, currentPosition.z),
             new Vector3(currentPosition.x + 100, currentPosition.y + 25, currentPosition.z),
             
-            new Vector3(currentPosition.x, currentPosition.y + 200, currentPosition.z + 200),
-            new Vector3(currentPosition.x + 100, currentPosition.y + 175, currentPosition.z + 200),
-            new Vector3(currentPosition.x + 50, currentPosition.y + 200, currentPosition.z + 200),
+            new Vector3(currentPosition.x + _offsetX, currentPosition.y + 200, currentPosition.z + 200 + _offsetZ),
+            new Vector3(currentPosition.x + _offsetX + 100, currentPosition.y + 175, currentPosition.z + 200 + _offsetZ),
+            new Vector3(currentPosition.x + _offsetX + 50, currentPosition.y + 200, currentPosition.z + 200 + _offsetZ),
         };
         m_Rigidbody.DOPath(path, _timeTurnBack, PathType.CubicBezier).SetEase(Curve5).OnComplete(() =>
         {
@@ -171,9 +170,9 @@ public class SimulatorFlight : MonoBehaviour
                 m_CurrentState = State.Back;
             });
         });
-        m_Graphic.DORotate(new Vector3(55, -90, 0), _timeTurnBack * 0.5f).SetEase(Curve6).OnComplete(() =>
+        m_Graphic.DORotate(new Vector3(40, -90, 0), _timeTurnBack * 0.5f).SetEase(Curve6).OnComplete(() =>
         {
-            m_Graphic.DORotate(new Vector3(20, -180, 0), _timeTurnBack * 0.5f).SetEase(Curve7).OnComplete(() =>
+            m_Graphic.DORotate(new Vector3(10, -180, 0), _timeTurnBack * 0.5f).SetEase(Curve7).OnComplete(() =>
             {
                 m_Graphic.DORotate(new Vector3(0, -180, 0), _timeTurnBack);
             });
