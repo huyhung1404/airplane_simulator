@@ -152,16 +152,35 @@ public class SimulatorFlight : MonoBehaviour
         yield return new WaitForSeconds(_timeStart);
         m_CurrentState = State.Turning;
         var currentPosition = transform.position;
-        var path = new[]
+        Vector3[] path;
+        if (m_Role == Role.Captain)
         {
-            new Vector3(currentPosition.x + 100, currentPosition.y + 100, currentPosition.z + 100),
-            new Vector3(currentPosition.x + 50, currentPosition.y, currentPosition.z),
-            new Vector3(currentPosition.x + 100, currentPosition.y + 25, currentPosition.z),
+            path = new[]
+            {
+                new Vector3(currentPosition.x + 100, currentPosition.y + 100, currentPosition.z + 100),
+                new Vector3(currentPosition.x + 50, currentPosition.y, currentPosition.z),
+                new Vector3(currentPosition.x + 100, currentPosition.y + 25, currentPosition.z),
             
-            new Vector3(currentPosition.x + _offsetX, currentPosition.y + 200, currentPosition.z + 200 + _offsetZ),
-            new Vector3(currentPosition.x + _offsetX + 100, currentPosition.y + 150, currentPosition.z + 200 + _offsetZ),
-            new Vector3(currentPosition.x + _offsetX + 50, currentPosition.y + 200, currentPosition.z + 200 + _offsetZ),
-        };
+                new Vector3(currentPosition.x + _offsetX, currentPosition.y + 200, currentPosition.z + 200 + _offsetZ),
+                new Vector3(currentPosition.x + _offsetX + 100, currentPosition.y + 150, currentPosition.z + 200 + _offsetZ),
+                new Vector3(currentPosition.x + _offsetX + 50, currentPosition.y + 200, currentPosition.z + 200 + _offsetZ),
+            };
+        }
+        else
+        {
+            path = new[]
+            {
+                new Vector3(currentPosition.x + 200, currentPosition.y + 100, currentPosition.z + 100),
+                new Vector3(currentPosition.x + 100, currentPosition.y, currentPosition.z),
+                new Vector3(currentPosition.x + 200, currentPosition.y + 25, currentPosition.z),
+            
+                new Vector3(currentPosition.x + _offsetX, currentPosition.y + 200, currentPosition.z + 200 + _offsetZ),
+                new Vector3(currentPosition.x + _offsetX + 200, currentPosition.y + 150, currentPosition.z + 200 + _offsetZ),
+                new Vector3(currentPosition.x + _offsetX + 100, currentPosition.y + 200, currentPosition.z + 200 + _offsetZ),
+            };
+        }
+        
+        
         m_Rigidbody.DOPath(path, _timeTurnBack, PathType.CubicBezier).SetEase(Curve5).OnComplete(() =>
         {
             m_Rigidbody.DOMove(_pos, _timeDuration - _timeStart  - _timeTurnBack).SetEase(m_AssemblyCurve).OnComplete(() =>
