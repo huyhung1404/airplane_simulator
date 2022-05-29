@@ -64,10 +64,15 @@ public class GameManager : MonoBehaviour
         m_CaptainTransform = m_Captain.transform;
     }
 
-    private IEnumerator Start()
+    public void StartGame()
+    {
+        StartCoroutine(Play());
+    }
+
+    private IEnumerator Play()
     {
         AudioPlane.instance.PlayAudioKhoiDong();
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(2);
         var delay = new WaitForSeconds(m_TimeWaitPlane);
         StartCoroutine(CameraManager());
         m_Captain.StartSimulator(Role.Captain, m_TimeWaitPlane + 10);
@@ -145,10 +150,7 @@ public class GameManager : MonoBehaviour
                         m_MemberBack.TurnBack(
                             new Vector3(_positionAssemble.x + 30, _positionAssemble.y, _positionAssemble.z + 30),
                             TdlBack, Ttc, TimeTurnBack,30,30);
-                        m_MapView.DOFade(0, 1).SetDelay(Ttc - 10).OnComplete(() =>
-                        {
-                            EndGame();
-                        });
+                        m_MapView.DOFade(0, 1).SetDelay(TdlBack + 5).OnComplete(EndGame);
                         break;
                 }
 

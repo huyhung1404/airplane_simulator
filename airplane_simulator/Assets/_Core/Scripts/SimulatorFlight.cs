@@ -159,7 +159,7 @@ public class SimulatorFlight : MonoBehaviour
             new Vector3(currentPosition.x + 100, currentPosition.y + 25, currentPosition.z),
             
             new Vector3(currentPosition.x + _offsetX, currentPosition.y + 200, currentPosition.z + 200 + _offsetZ),
-            new Vector3(currentPosition.x + _offsetX + 100, currentPosition.y + 175, currentPosition.z + 200 + _offsetZ),
+            new Vector3(currentPosition.x + _offsetX + 100, currentPosition.y + 150, currentPosition.z + 200 + _offsetZ),
             new Vector3(currentPosition.x + _offsetX + 50, currentPosition.y + 200, currentPosition.z + 200 + _offsetZ),
         };
         m_Rigidbody.DOPath(path, _timeTurnBack, PathType.CubicBezier).SetEase(Curve5).OnComplete(() =>
