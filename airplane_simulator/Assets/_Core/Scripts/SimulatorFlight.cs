@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.IO;
 using System.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
@@ -16,21 +17,17 @@ public enum State
 
 public class SimulatorFlight : MonoBehaviour
 {
+    public string fileName;
+    private FlightData m_Data;
     [Header("Graphic")] [SerializeField] private Transform m_Graphic;
     [SerializeField] private AnimationPlane m_Animation;
-    [Header("Phase 0")] [SerializeField] private float S0;
-    [SerializeField] private float T0;
+    [Header("Phase 0")]
     [SerializeField] private AnimationCurve Curve0;
-    [Header("Phase 1")] [SerializeField] private float h;
-    [SerializeField] private float Sat;
-    [SerializeField] private float T1;
+    [Header("Phase 1")]
     [SerializeField] private AnimationCurve Curve1;
-    [Header("Phase 2")] [SerializeField] private float Sbb;
-    [SerializeField] private float T2;
+    [Header("Phase 2")]
     [SerializeField] private AnimationCurve Curve2;
-    [Header("Phase 3")] [SerializeField] private float H;
-    [SerializeField] private float SH;
-    [SerializeField] private float T3;
+    [Header("Phase 3")]
     [SerializeField] private AnimationCurve Curve3;
     [Header("Phase 4")]
     [SerializeField] private AnimationCurve Curve5;
@@ -38,7 +35,7 @@ public class SimulatorFlight : MonoBehaviour
     [SerializeField] private AnimationCurve Curve7;
     [SerializeField] private AnimationCurve m_StartCurve;
 
-    [SerializeField] private Vector3 m_LastVelocity;
+    private Vector3 m_LastVelocity;
 
     [SerializeField] private AnimationCurve m_AssemblyCurve;
     private Rigidbody m_Rigidbody;
@@ -52,7 +49,15 @@ public class SimulatorFlight : MonoBehaviour
     private void Start()
     {
         m_Rigidbody = GetComponent<Rigidbody>();
+        ReadJson();
         m_CurrentState = State.None;
+    }
+    
+    public void ReadJson(){
+        string path = $"{Application.streamingAssetsPath}/{fileName}.json";
+        string contents = File.ReadAllText(path);
+        m_Data = JsonUtility.FromJson<FlightData>(contents);
+        m_LastVelocity = new Vector3(m_Data.lastVelocity,0,0);
     }
 
     public void StartSimulator(Role _role,float _timeStart)
@@ -88,19 +93,19 @@ public class SimulatorFlight : MonoBehaviour
     private void StartFlight()
     {
         if(m_Role == Role.Captain) AudioPlane.instance.PlayAudioCatCanh();
-        m_Rigidbody.DOMoveX(m_Rigidbody.position.x + S0, T0).SetEase(Curve0).OnComplete(() =>
+        m_Rigidbody.DOMoveX(m_Rigidbody.position.x + m_Data.S0, m_Data.T0).SetEase(Curve0).OnComplete(() =>
         {
             m_Animation.StartFly();
             if(m_Role == Role.Captain) AudioPlane.instance.PlayAudioBay();
             m_Rigidbody
-                .DOMove(new Vector3(m_Rigidbody.position.x + Sat, m_Rigidbody.position.y + h, m_Rigidbody.position.z),
-                    T1).SetEase(Curve1).OnComplete(() =>
+                .DOMove(new Vector3(m_Rigidbody.position.x + m_Data.Sat, m_Rigidbody.position.y + m_Data.h, m_Rigidbody.position.z),
+                    m_Data.T1).SetEase(Curve1).OnComplete(() =>
                 {
-                    m_Rigidbody.DOMoveX(m_Rigidbody.position.x + Sbb, T2).SetEase(Curve2).OnComplete(() =>
+                    m_Rigidbody.DOMoveX(m_Rigidbody.position.x + m_Data.Sbb, m_Data.T2).SetEase(Curve2).OnComplete(() =>
                     {
                         m_Rigidbody.DOMove(
-                            new Vector3(m_Rigidbody.position.x + SH, m_Rigidbody.position.y + H,
-                                m_Rigidbody.position.z), T3).SetEase(Curve3).OnComplete(() =>
+                            new Vector3(m_Rigidbody.position.x + m_Data.SH, m_Rigidbody.position.y + m_Data.H,
+                                m_Rigidbody.position.z), m_Data.T3).SetEase(Curve3).OnComplete(() =>
                         {
                             m_CurrentState = State.Stable;
                             if (m_Role == Role.Captain)
@@ -206,4 +211,19 @@ public class SimulatorFlight : MonoBehaviour
             m_CurrentState = State.Stable;
         });
     }
+}
+
+public class FlightData
+{
+    public float S0;
+    public float T0;
+    public float h;
+    public float Sat;
+    public float T1;
+    public float Sbb;
+    public float T2;
+    public float H;
+    public float SH;
+    public float T3;
+    public float lastVelocity;
 }

@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/_Scenes/Manager.unity
+    guid: 1d1f626b35c7b8d4dab63e7dde549905
+  - enabled: 1
+    path: Assets/_Scenes/AirplaneSimulator.unity
+    guid: 3d29dd5e404afb7499b948d5f80607db
+  - enabled: 1
     path: Assets/_Scenes/AirplaneSimulatorTurnBack.unity
     guid: d79b4dd2355fcd244aaa26ee2f654cd2
   m_configObjects: {}

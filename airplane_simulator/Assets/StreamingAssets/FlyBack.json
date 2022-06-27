@@ -1,0 +1,13 @@
+{
+  "m_CloudsHeight" : 86,
+  "m_TimeWaitPlane" : 20,
+  "Ttc" : 100,
+  "TimeTurnBack" : 15,
+  "TdlLeft" : 11.2,
+  "TdlRight" : 22.4,
+  "TdlBack" : 33.6,
+  "DistanceAssemble" : 15,
+  "_positionAssembleX" : -400,
+  "_positionAssembleY" : 200,
+  "_positionAssembleZ" : 200
+}
